@@ -25,9 +25,18 @@ class TelegramBotService:
 
     async def process_update(self, update: dict[str, Any]) -> dict[str, Any]:
         """Processes a single incoming Telegram update and dispatches response."""
+        update_id = update.get("update_id")
+        msg = update.get("message", {})
+        text = msg.get("text", "")
+        chat_id = msg.get("chat", {}).get("id")
+        sender = msg.get("from", {}).get("username") or msg.get("from", {}).get("first_name")
+        logger.info(f"Processing Telegram update #{update_id} from {sender} (chat_id={chat_id}): '{text}'")
         chat_id, reply_text = await dispatch_telegram_update(update)
         if chat_id and reply_text:
-            return await telegram_client.send_message(chat_id=chat_id, text=reply_text)
+            logger.info(f"Dispatching reply to chat {chat_id} ({len(reply_text)} chars)...")
+            res = await telegram_client.send_message(chat_id=chat_id, text=reply_text)
+            logger.info(f"Reply dispatch status for chat {chat_id}: ok={res.get('ok')}")
+            return res
         return {"ok": True, "skipped": True}
 
     async def start_polling(self) -> None:

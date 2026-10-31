@@ -24,10 +24,25 @@ class TelegramClient:
         dry_run: bool | None = None,
         enabled: bool | None = None,
     ) -> None:
-        self.bot_token = bot_token if bot_token is not None else settings.TELEGRAM_BOT_TOKEN
-        self.dry_run = dry_run if dry_run is not None else settings.TELEGRAM_DRY_RUN
-        self.enabled = enabled if enabled is not None else settings.TELEGRAM_ENABLED
-        self.base_url = f"https://api.telegram.org/bot{self.bot_token}" if self.bot_token else ""
+        self._bot_token = bot_token
+        self._dry_run = dry_run
+        self._enabled = enabled
+
+    @property
+    def bot_token(self) -> str:
+        return self._bot_token if self._bot_token is not None else settings.TELEGRAM_BOT_TOKEN
+
+    @property
+    def dry_run(self) -> bool:
+        return self._dry_run if self._dry_run is not None else settings.TELEGRAM_DRY_RUN
+
+    @property
+    def enabled(self) -> bool:
+        return self._enabled if self._enabled is not None else settings.TELEGRAM_ENABLED
+
+    @property
+    def base_url(self) -> str:
+        return f"https://api.telegram.org/bot{self.bot_token}" if self.bot_token else ""
 
     @property
     def is_configured(self) -> bool:
@@ -62,12 +77,14 @@ class TelegramClient:
         text: str,
         parse_mode: str = "HTML",
         disable_web_page_preview: bool = True,
+        dry_run: bool | None = None,
     ) -> dict[str, Any]:
         """
         Dispatches a message to the specified Telegram chat_id.
         In dry-run or unconfigured mode, simulates successful dispatch.
         """
-        if not self.is_configured or self.dry_run:
+        effective_dry_run = dry_run if dry_run is not None else self.dry_run
+        if not self.is_configured or effective_dry_run:
             simulated_id = f"sim_msg_{uuid.uuid4().hex[:10]}"
             logger.info(
                 f"[TELEGRAM SIMULATION] Target Chat: {chat_id} | Status: Simulated | ID: {simulated_id}"
@@ -82,15 +99,21 @@ class TelegramClient:
                 "simulated": True,
             }
 
-        payload = {
+        payload: dict[str, Any] = {
             "chat_id": chat_id,
             "text": text,
-            "parse_mode": parse_mode,
             "disable_web_page_preview": disable_web_page_preview,
         }
+        if parse_mode:
+            payload["parse_mode"] = parse_mode
 
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.post(f"{self.base_url}/sendMessage", json=payload)
+            if resp.status_code == 400 and "can't parse entities" in resp.text:
+                logger.warning(f"Telegram HTML entity parsing failed, retrying as plain text: {resp.text}")
+                payload.pop("parse_mode", None)
+                resp = await client.post(f"{self.base_url}/sendMessage", json=payload)
+
             if resp.status_code >= 400:
                 logger.error(f"Telegram API delivery error: {resp.status_code} - {resp.text}")
                 resp.raise_for_status()
@@ -129,7 +152,10 @@ class TelegramClient:
             resp = await client.get(f"{self.base_url}/getUpdates", params=params)
             resp.raise_for_status()
             data = resp.json()
-            return data.get("result", [])
+            updates = data.get("result", [])
+            if updates:
+                logger.info(f"Retrieved {len(updates)} update(s) from Telegram API: {[u.get('update_id') for u in updates]}")
+            return updates
 
 
 telegram_client = TelegramClient()

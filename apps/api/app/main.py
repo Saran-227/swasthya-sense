@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
         # 4. Start Telegram Polling if active
         if settings.TELEGRAM_ENABLED and not settings.TELEGRAM_DRY_RUN:
-            asyncio.create_task(bot_service.start_polling())
+            bot_service.polling_task = asyncio.create_task(bot_service.start_polling())
             logger.info("Telegram background polling worker activated.")
         else:
             logger.info("Telegram integration operating in DRY-RUN/SIMULATION mode.")

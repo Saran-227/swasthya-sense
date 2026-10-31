@@ -197,7 +197,11 @@ async def dispatch_single_reminder(
     error_message = None
 
     try:
-        resp = await telegram_client.send_message(chat_id=chat_id, text=message_text)
+        resp = await telegram_client.send_message(
+            chat_id=chat_id,
+            text=message_text,
+            dry_run=effective_dry_run,
+        )
         is_sim = resp.get("simulated", False) or effective_dry_run
         delivery_status = "Simulated" if is_sim else "Sent"
         telegram_msg_id = str(resp.get("result", {}).get("message_id", "simulated"))

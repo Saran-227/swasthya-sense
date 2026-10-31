@@ -182,6 +182,10 @@ def test_determine_reminder_type():
 
 def test_consent_and_opt_in_filtering():
     """Verify that unconsented or opted-out patients are flagged ineligible."""
+    with db_session() as conn:
+        conn.execute("UPDATE patients SET consent_given = 0 WHERE patient_id = 'PT-SENSE-105'")
+        conn.execute("UPDATE patients SET telegram_opt_in = 0 WHERE patient_id = 'PT-SENSE-104'")
+
     recipients = fetch_reminder_recipients()
     pt_no_consent = next((r for r in recipients if r["patient_id"] == "PT-SENSE-105"), None)
     if pt_no_consent:

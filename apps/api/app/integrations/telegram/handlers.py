@@ -171,15 +171,18 @@ async def dispatch_telegram_update(update: dict[str, Any]) -> Tuple[int, str]:
     if not chat_id:
         return 0, ""
 
-    if text.startswith("/start"):
-        parts = text.split(maxsplit=1)
-        args = parts[1] if len(parts) > 1 else ""
+    parts = text.split(maxsplit=1)
+    raw_cmd = parts[0] if parts else ""
+    cmd = raw_cmd.split("@")[0].lower()
+    args = parts[1] if len(parts) > 1 else ""
+
+    if cmd == "/start":
         reply = await handle_start_command(chat_id=chat_id, args=args, username=username, first_name=first_name)
-    elif text.startswith("/help"):
+    elif cmd == "/help":
         reply = await handle_help_command(chat_id=chat_id)
-    elif text.startswith("/status"):
+    elif cmd == "/status":
         reply = await handle_status_command(chat_id=chat_id)
-    elif text.startswith("/stop"):
+    elif cmd == "/stop":
         reply = await handle_stop_command(chat_id=chat_id)
     else:
         reply = (
