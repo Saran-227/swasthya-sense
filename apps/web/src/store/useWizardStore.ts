@@ -15,6 +15,7 @@ import type {
 import { REPORT_TOTALS } from '../types/extraction';
 import { FEATURE_SCHEMA, getDefaultPatientData, validateFeatureValue } from '../config/featureSchema';
 import { PATIENT_PROFILES, usePatientStore } from './usePatientStore';
+import { API_BASE_URL } from '../api/clientConfig';
 
 // Clean up legacy storage keys on module startup
 if (typeof window !== 'undefined') {
@@ -458,7 +459,7 @@ export const useWizardStore = create<WizardState>()(
         set({ isAnalyzing: true, analysisError: null });
 
         try {
-          const res = await fetch('/api/v1/analyze?top_k=6', {
+          const res = await fetch(`${API_BASE_URL}/api/v1/analyze?top_k=6`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(patientPayload),

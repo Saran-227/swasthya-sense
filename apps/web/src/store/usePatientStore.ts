@@ -296,7 +296,7 @@ interface PatientStore {
   runLocalSimulation: (data?: PatientData) => void;
 }
 
-const API_BASE_URL = '';
+import { API_BASE_URL } from '../api/clientConfig';
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 const initialPatient = PATIENT_PROFILES.high_risk_lad.data;
 const initialSimulation = generateLocalSimulation(initialPatient);

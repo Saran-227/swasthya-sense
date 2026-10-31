@@ -30,7 +30,8 @@ export const AuthCallbackPage: React.FC = () => {
 
     async function handleExchange() {
       try {
-        await loginWithCode(code!);
+        const redirectUri = window.location.origin + '/api/auth/callback/google';
+        await loginWithCode(code!, redirectUri);
         if (isMounted) {
           setStatus('success');
           setTimeout(() => {

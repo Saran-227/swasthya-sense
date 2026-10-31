@@ -4,8 +4,9 @@
  */
 
 import type { AuthConfig, AuthResponse } from '../types/auth';
+import { API_PREFIX } from './clientConfig';
 
-const API_BASE = '/api';
+const API_BASE = API_PREFIX;
 
 export async function fetchAuthConfig(): Promise<AuthConfig> {
   const resp = await fetch(`${API_BASE}/auth/config`);
