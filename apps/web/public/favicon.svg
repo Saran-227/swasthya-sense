@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!--
+    Colours used:
+    - Default (Paper theme): --acc (#1D3F8A), --onacc (#FFFFFF)
+    - Dark mode (Monitor theme): --page (#06100C), --bd (#1D3A2A), --acc (#4CFF9A)
+    These two colour sets are the --acc / --onacc values of Paper and the --page / --bd / --acc values of Monitor.
+    This is the only place besides tokens.css allowed to hold them.
+  -->
+  <style>
+    .bg { fill: #1D3F8A; stroke: none; }
+    .ln { stroke: #FFFFFF; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #06100C; stroke: #1D3A2A; }
+      .ln { stroke: #4CFF9A; }
+    }
+  </style>
+  <rect class="bg" x="0.5" y="0.5" width="31" height="31" rx="6"/>
+  <polyline class="ln" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" points="3,17 10,17 12.5,17 15,7 18,26 20.5,17 29,17"/>
+</svg>
