@@ -1,13 +1,12 @@
-# Perfusion3D: Spatial Hemodynamic Ischemia & Coronary Twin
-> **Real-Time Spatial Coronary Digital Twin & Multi-Vessel Ischemia Telemetry**  
-> *Track A: Cardiovascular Risk Visualization & Prediction — Multimodal AI Hackathon 2026*
+# SWASTHYA SENSE — Early Warning & Follow-up for High-Risk Patients
+> **Smart Follow-up. Timely Attention. Better Care.**  
+> *Problem 2: SWASTHYA SENSE — Early Warning and Follow-up for High-Risk Patients*
 
-[![Docker Compose](https://img.shields.io/badge/Docker%20Compose-Ready%20(:8080)-2496ED?style=flat-square&logo=docker&logoColor=white)](#quickstart-docker-recommended)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React 18](https://img.shields.io/badge/React-18.3-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
 [![Three.js](https://img.shields.io/badge/Three.js-WebGL-black?style=flat-square&logo=three.js&logoColor=white)](https://threejs.org)
-[![Groq LLM](https://img.shields.io/badge/LLM-Groq%20Llama%203.3%2070B-orange?style=flat-square)](https://groq.com)
-[![SaMD Category](https://img.shields.io/badge/SaMD-Class%20IIa%20Prototype-blue?style=flat-square)](#clinical-safety--regulatory-boundary)
+[![Telegram Bot](https://img.shields.io/badge/Telegram-Official%20Bot%20API-blue?style=flat-square&logo=telegram)](https://core.telegram.org/bots/api)
+[![SaMD Category](https://img.shields.io/badge/SaMD-Decision%20Support-blue?style=flat-square)](#clinical-safety--regulatory-boundary)
 
 ---
 
@@ -239,8 +238,8 @@ node e2e/full_flow.spec.cjs
 ## Clinical Safety & Regulatory Boundary
 
 > **IMPORTANT CLINICAL NOTICE**  
-> *"Predictions are for decision-support and educational purposes only and are not a substitute for formal diagnostic imaging or professional medical evaluation."*  
-> Perfusion3D does NOT diagnose, treat, or replace professional cardiovascular examination or invasive coronary angiography (Cath). All predictions represent statistical machine-learning estimates based on training cohorts.
+> *"Predictions, reminders, and risk indicators are for decision-support and educational follow-up only and are not a substitute for formal diagnostic imaging or professional medical evaluation."*  
+> SWASTHYA SENSE does NOT diagnose, treat, or replace professional cardiovascular examination or clinical oversight. All automated reminders and risk flags represent statistical estimates and scheduled check-in reminders under qualified clinician supervision.
 
 ---
 

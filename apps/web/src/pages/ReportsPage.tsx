@@ -54,8 +54,8 @@ export const ReportsPage: React.FC = () => {
     const origTitle = document.title;
     const todayStr = new Date().toISOString().slice(0, 10);
     const printTitle = activeTab === 'technical'
-      ? `Perfusion3D clinician report ${todayStr}`
-      : `Perfusion3D patient report ${todayStr}`;
+      ? `SWASTHYA SENSE clinician report ${todayStr}`
+      : `SWASTHYA SENSE patient report ${todayStr}`;
 
     document.title = printTitle;
 

@@ -1,7 +1,7 @@
 {
-  "name": "Perfusion3D",
-  "short_name": "Perfusion3D",
-  "description": "Estimates the likelihood of coronary artery narrowing from clinical measurements and shows the result on a 3D heart.",
+  "name": "SWASTHYA SENSE",
+  "short_name": "SWASTHYA SENSE",
+  "description": "Smart Follow-up. Timely Attention. Better Care. Patient follow-up and early-warning monitoring.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFF6F4",

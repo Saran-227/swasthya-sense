@@ -3,6 +3,7 @@ FastAPI Main Application Entrypoint
 Multimodal AI Hackathon 2026 - Track A: Cardiovascular Risk Visualization & Prediction
 """
 
+import asyncio
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from fastapi import FastAPI, Request
@@ -10,29 +11,53 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from apps.api.app.config import settings
+from apps.api.app.db.session import init_db
+from apps.api.app.integrations.telegram.bot import bot_service
+from apps.api.app.integrations.telegram.router import telegram_router
 from apps.api.app.routes import api_router
 from apps.api.app.services.model_service import model_service
+from apps.api.app.services.reminder_scheduler import reminder_scheduler
 from apps.api.app.utils.logger import logger
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Lifespan context manager: loads ML models into memory before accepting traffic."""
-    logger.info("Initializing Cardiovascular Risk Inference Engine...")
+    """Lifespan context manager: initializes database, models, and background services."""
+    logger.info("Initializing SWASTHYA SENSE Platform...")
     try:
+        # 1. Initialize SQLite Database & Synthetic Patients
+        init_db()
+        logger.info("Shared SQLite database initialized.")
+
+        # 2. Load ML Models & TreeSHAP Explainers
         model_service.load_artifacts()
-        logger.info("Startup complete: 4 prediction heads and TreeSHAP explainers ready.")
+        logger.info("Clinical risk inference engine loaded.")
+
+        # 3. Start Daily Reminder Scheduler
+        reminder_scheduler.start()
+
+        # 4. Start Telegram Polling if active
+        if settings.TELEGRAM_ENABLED and not settings.TELEGRAM_DRY_RUN:
+            asyncio.create_task(bot_service.start_polling())
+            logger.info("Telegram background polling worker activated.")
+        else:
+            logger.info("Telegram integration operating in DRY-RUN/SIMULATION mode.")
+
     except Exception as e:
-        logger.error(f"FATAL during model loading: {e}", exc_info=True)
+        logger.error(f"FATAL during SWASTHYA SENSE startup: {e}", exc_info=True)
         raise
+
     yield
-    logger.info("Shutting down inference engine...")
+
+    logger.info("Shutting down SWASTHYA SENSE services...")
+    reminder_scheduler.stop()
+    bot_service.stop_polling()
 
 
 app = FastAPI(
-    title="Perfusion3D API",
+    title="SWASTHYA SENSE API",
     version=settings.VERSION,
-    description="High-Throughput Multi-Target Coronary Stenosis & Ischemia Prediction Engine with Sub-4ms TreeSHAP Explainability",
+    description="SWASTHYA SENSE: Early Warning and Follow-up for High-Risk Patients. Multi-Target Risk Telemetry, 3D Digital Twin, and Automated Telegram Follow-up Engine.",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -52,7 +77,7 @@ app.add_middleware(
 async def add_clinical_disclaimer_header(request: Request, call_next):
     """Injects mandatory clinical decision-support warning header into every API response."""
     response = await call_next(request)
-    response.headers["X-Application-Name"] = "Perfusion3D"
+    response.headers["X-Application-Name"] = "SWASTHYA SENSE"
     response.headers["X-Clinical-Decision-Support"] = "True"
     response.headers["X-SaMD-Category"] = "Class-IIa-Educational-Prototype"
     return response
@@ -62,7 +87,7 @@ async def add_clinical_disclaimer_header(request: Request, call_next):
 @app.get("/health", tags=["System"])
 def root_health():
     return {
-        "service": "Perfusion3D API",
+        "service": "SWASTHYA SENSE API",
         "status": "READY" if model_service.is_ready else "INITIALIZING",
         "version": settings.VERSION,
         "disclaimer": settings.CLINICAL_DISCLAIMER,
@@ -72,8 +97,10 @@ def root_health():
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse, FileResponse
 
-# Mount API V1 Router
+# Mount Routers (both /api and /api/v1 prefixes supported for seamless integration)
 app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(telegram_router, prefix="/api")
+app.include_router(telegram_router, prefix=settings.API_V1_STR)
 
 # Mount production Web UI and 3D assets if build distribution exists
 if settings.WEB_DIST_DIR.exists():

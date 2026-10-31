@@ -1,6 +1,7 @@
 """
 Application Configuration
-Multimodal AI Hackathon 2026 - Track A: Cardiovascular Risk Visualization & Prediction
+SWASTHYA SENSE - Early Warning and Follow-up for High-Risk Patients
+Smart Follow-up. Timely Attention. Better Care.
 """
 
 from pathlib import Path
@@ -11,7 +12,7 @@ ROOT_DIR: Path = Path(__file__).resolve().parent.parent.parent.parent
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Perfusion3D API"
+    PROJECT_NAME: str = "SWASTHYA SENSE API"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     DEBUG: bool = False
@@ -21,6 +22,16 @@ class Settings(BaseSettings):
     MODELS_DIR: Path = ROOT_DIR / "models"
     DATA_DIR: Path = ROOT_DIR / "data"
     WEB_DIST_DIR: Path = ROOT_DIR / "apps" / "web" / "dist"
+    DATABASE_PATH: Path = ROOT_DIR / "data" / "swasthya_sense.db"
+
+    # Telegram Bot & Integration Settings
+    TELEGRAM_BOT_TOKEN: str = ""
+    TELEGRAM_BOT_USERNAME: str = "SwasthyaSenseBot"
+    TELEGRAM_ENABLED: bool = False
+    TELEGRAM_DRY_RUN: bool = True
+    REMINDER_TIME: str = "09:00"
+    REMINDER_TIMEZONE: str = "Asia/Kolkata"
+    LINKING_TOKEN_EXPIRE_MINUTES: int = 30
 
     # CORS configuration for React / Vite development
     CORS_ORIGINS: list[str] = [
@@ -33,14 +44,16 @@ class Settings(BaseSettings):
 
     # Clinical Safety Disclaimer (FDA / CE SaMD Decision Support Boundary)
     CLINICAL_DISCLAIMER: str = (
-        "DECISION SUPPORT ONLY: This system is an investigational AI prototype for clinical "
-        "decision support and research. Predictions and 3D visualizations DO NOT constitute formal "
-        "medical diagnosis or replace invasive coronary angiography or diagnostic imaging."
+        "DECISION SUPPORT ONLY: SWASTHYA SENSE is an early-warning and follow-up decision support platform. "
+        "Alerts and reminders do NOT constitute formal medical diagnoses and must always remain under "
+        "qualified clinician supervision."
     )
 
     model_config = SettingsConfigDict(
         case_sensitive=True,
         extra="ignore",
+        env_file=".env",
+        env_file_encoding="utf-8",
     )
 
 

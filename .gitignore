@@ -56,6 +56,8 @@ apps/web/dist-ssr/
 .env.production.local
 *.pem
 *.key
+*.db
+*.sqlite3
 
 # --- 3D Assets & CAD Intermediate Files ---
 # Exclude heavy raw meshes, blender source backups, and uncompressed geometry

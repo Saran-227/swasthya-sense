@@ -85,7 +85,7 @@ export const AppNav: React.FC<AppNavProps> = ({ forceStep, forceState }) => {
             textDecoration: 'none',
             color: 'inherit',
           }}
-          aria-label="Perfusion3D Home"
+          aria-label="SWASTHYA SENSE Home"
         >
           <Trace width={36} height={16} className="trace-initial" />
           <span
@@ -96,7 +96,7 @@ export const AppNav: React.FC<AppNavProps> = ({ forceStep, forceState }) => {
               color: 'var(--ink)',
             }}
           >
-            Perfusion3D
+            SWASTHYA SENSE
           </span>
         </Link>
 
