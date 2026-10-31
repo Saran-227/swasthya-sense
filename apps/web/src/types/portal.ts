@@ -24,6 +24,9 @@ export interface PatientRecord {
   reminder_window?: string | null;
   notify_upcoming?: boolean;
   notify_overdue?: boolean;
+  user_id?: string | null;
+  email?: string | null;
+  profile_picture?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
 }
@@ -86,4 +89,7 @@ export interface PatientRegistrationPayload {
   reminder_window?: string;
   notify_upcoming?: boolean;
   notify_overdue?: boolean;
+  user_id?: string;
+  email?: string;
+  profile_picture?: string;
 }

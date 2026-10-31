@@ -17,8 +17,9 @@ import type {
   TelegramPreferences,
   PatientRegistrationPayload,
 } from '../types/portal';
+import { API_PREFIX } from './clientConfig';
 
-const API_BASE = '/api';
+const API_BASE = API_PREFIX;
 
 export async function fetchPatients(): Promise<PatientRecord[]> {
   const resp = await fetch(`${API_BASE}/patients`);

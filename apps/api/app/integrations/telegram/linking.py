@@ -165,6 +165,17 @@ def redeem_linking_token(
         f"Successfully linked Telegram chat_id {chat_id} (@{username}) to patient {target_patient_id} ({updated_patient['full_name']})"
     )
 
+    try:
+        from apps.api.app.services.mongodb_service import mongodb_service
+        with db_session() as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM patients WHERE patient_id = ?;", (target_patient_id,))
+            full_p = cur.fetchone()
+            if full_p:
+                mongodb_service.sync_patient(dict(full_p))
+    except Exception as e:
+        logger.warning(f"Could not sync linked patient to MongoDB Atlas: {e}")
+
     return {
         "success": True,
         "message": f"Telegram account linked successfully to patient {updated_patient['full_name']}.",
@@ -192,6 +203,15 @@ def unlink_telegram_account(patient_id: str) -> dict[str, Any]:
         if cursor.rowcount == 0:
             raise LinkingError(f"Patient ID '{patient_id}' not found.")
 
+        cursor.execute("SELECT * FROM patients WHERE patient_id = ?;", (patient_id,))
+        full_p = cursor.fetchone()
+        if full_p:
+            try:
+                from apps.api.app.services.mongodb_service import mongodb_service
+                mongodb_service.sync_patient(dict(full_p))
+            except Exception:
+                pass
+
     return {"success": True, "patient_id": patient_id, "message": "Telegram account disconnected."}
 
 
@@ -210,6 +230,15 @@ def set_telegram_opt_in(chat_id: int, opt_in: bool) -> dict[str, Any]:
             (1 if opt_in else 0, now_iso, chat_id),
         )
         count = cursor.rowcount
+
+        cursor.execute("SELECT * FROM patients WHERE telegram_chat_id = ?;", (chat_id,))
+        rows = cursor.fetchall()
+        for r in rows:
+            try:
+                from apps.api.app.services.mongodb_service import mongodb_service
+                mongodb_service.sync_patient(dict(r))
+            except Exception:
+                pass
 
     return {"success": True, "chat_id": chat_id, "opt_in": opt_in, "affected_patients": count}
 

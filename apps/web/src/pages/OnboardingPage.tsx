@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePortalStore } from '../store/usePortalStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { GoogleLoginButton } from '../components/auth/GoogleLoginButton';
 import type { PatientRegistrationPayload } from '../types/portal';
 import {
   UserPlus,
@@ -16,6 +18,7 @@ import {
   CheckCircle2,
   AlertCircle,
   HelpCircle,
+  Check,
 } from 'lucide-react';
 
 const PRESET_SYNTHETIC_PROFILES = [
@@ -75,9 +78,10 @@ const PRESET_SYNTHETIC_PROFILES = [
 export const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
   const { registerPatient, openWizard, isLoading } = usePortalStore();
+  const { user, patient, isAuthenticated } = useAuthStore();
 
   const [formData, setFormData] = useState<PatientRegistrationPayload>({
-    full_name: '',
+    full_name: user?.full_name || '',
     age: 45,
     gender: 'Male',
     contact_phone: '+91 ',
@@ -91,7 +95,23 @@ export const OnboardingPage: React.FC = () => {
     reminder_window: '09:00 AM',
     notify_upcoming: true,
     notify_overdue: true,
+    user_id: user?.user_id,
+    email: user?.email,
+    profile_picture: user?.picture || undefined,
   });
+
+  // Keep form in sync if user logs in on page
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        full_name: prev.full_name || user.full_name,
+        user_id: user.user_id,
+        email: user.email,
+        profile_picture: user.picture || undefined,
+      }));
+    }
+  }, [user]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showTelegramPrompt, setShowTelegramPrompt] = useState(false);
@@ -101,6 +121,9 @@ export const OnboardingPage: React.FC = () => {
     setFormData((prev: PatientRegistrationPayload) => ({
       ...prev,
       ...preset.data,
+      user_id: user?.user_id,
+      email: user?.email,
+      profile_picture: user?.picture || undefined,
     }));
     setErrors({});
   };
@@ -128,7 +151,13 @@ export const OnboardingPage: React.FC = () => {
     if (!validate()) return;
 
     try {
-      const created = await registerPatient(formData);
+      const payload: PatientRegistrationPayload = {
+        ...formData,
+        user_id: user?.user_id,
+        email: user?.email,
+        profile_picture: user?.picture || undefined,
+      };
+      const created = await registerPatient(payload);
       setCreatedPatientId(created.patient_id);
       setShowTelegramPrompt(true);
     } catch (err: any) {
@@ -154,6 +183,77 @@ export const OnboardingPage: React.FC = () => {
           Register a new patient to initialize their follow-up schedule, multi-target risk tracking, and automated reminder channel.
         </p>
       </div>
+
+      {/* Google Authentication Fast-Track Registration Card */}
+      {!isAuthenticated ? (
+        <div
+          className="p-4 sm:p-5 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
+          style={{
+            background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(16, 185, 129, 0.05))',
+            borderColor: 'var(--bd)',
+          }}
+        >
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Sparkles size={16} style={{ color: 'var(--acc)' }} />
+              <span className="text-xs sm:text-sm font-bold" style={{ color: 'var(--ink)' }}>
+                Fast-Track Registration with Google
+              </span>
+              <span
+                className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold"
+                style={{ backgroundColor: 'var(--hov)', color: 'var(--acc)' }}
+              >
+                Instant Unique ID
+              </span>
+            </div>
+            <p className="text-xs max-w-md" style={{ color: 'var(--mut)' }}>
+              Sign up with Google in 1 click. You will immediately be assigned a unique Patient ID, your record will be securely saved in the database, and your dashboard will be personalized.
+            </p>
+          </div>
+          <GoogleLoginButton size="md" label="Register with Google" onSuccess={() => navigate('/dashboard')} />
+        </div>
+      ) : (
+        <div
+          className="p-4 rounded-lg border flex items-center justify-between gap-3 shadow-sm"
+          style={{ backgroundColor: 'var(--panel)', borderColor: 'var(--acc)' }}
+        >
+          <div className="flex items-center gap-3">
+            {user?.picture ? (
+              <img
+                src={user.picture}
+                alt={user.full_name}
+                className="w-10 h-10 rounded-full object-cover border-2"
+                style={{ borderColor: 'var(--acc)' }}
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+                style={{ backgroundColor: 'var(--acc)', color: 'var(--onacc)' }}
+              >
+                {user?.full_name?.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <div className="text-xs font-bold" style={{ color: 'var(--ink)' }}>
+                Registered via Google: {user?.full_name}
+              </div>
+              <div className="text-[11px] font-mono" style={{ color: 'var(--mut)' }}>
+                Assigned Patient ID: <strong style={{ color: 'var(--acc)' }}>{user?.patient_id}</strong> • {user?.email}
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard')}
+            className="px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition-all"
+            style={{ backgroundColor: 'var(--acc)', color: 'var(--onacc)' }}
+          >
+            <span>Open Dashboard</span>
+            <ArrowRight size={13} />
+          </button>
+        </div>
+      )}
 
       {/* Synthetic Cohort Quick-Load Demo Selector */}
       <div

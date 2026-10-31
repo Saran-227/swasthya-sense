@@ -8,6 +8,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import type { PatientData } from '../types/clinical';
 import type { PatientReportData, TechnicalReportData } from '../types/wizard';
 import { useWizardStore } from '../store/useWizardStore';
+import { API_BASE_URL } from '../api/clientConfig';
 
 export type ReportStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -60,7 +61,7 @@ export function useReports(patientData: PatientData): UseReportsReturn {
     setStatus('loading');
 
     try {
-      const res = await fetch('/api/v1/reports', {
+      const res = await fetch(`${API_BASE_URL}/api/v1/reports`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

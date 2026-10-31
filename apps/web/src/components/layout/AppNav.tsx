@@ -8,7 +8,7 @@ import { Trace } from '../ui/Trace';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { SecondaryButton } from '../ui/SecondaryButton';
 import { QuietButton } from '../ui/QuietButton';
-import { PatientSwitcher } from '../portal/PatientSwitcher';
+import { UserMenu } from '../auth/UserMenu';
 
 export interface AppNavProps {
   // Optional override for design system preview
@@ -159,6 +159,7 @@ export const AppNav: React.FC<AppNavProps> = ({ forceStep, forceState }) => {
           ) : (
             <div className="flex items-center gap-1.5 h-full">
               {[
+                { path: '/', label: 'Home' },
                 { path: '/dashboard', label: 'Dashboard' },
                 { path: '/profile', label: 'Profile & Reminders' },
                 { path: '/onboarding', label: 'Onboarding' },
@@ -187,7 +188,7 @@ export const AppNav: React.FC<AppNavProps> = ({ forceStep, forceState }) => {
 
         {/* Task 2.4 RIGHT zone */}
         <div style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <PatientSwitcher />
+          <UserMenu />
 
           {/* If inside clinical wizard, quick jump back to patient dashboard */}
           {isWizardStep && (

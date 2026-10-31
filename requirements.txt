@@ -11,6 +11,9 @@ pydantic-settings>=2.2.1
 python-multipart>=0.0.9
 pdfplumber==0.11.4
 apscheduler>=3.10.4
+pyjwt>=2.8.0
+pymongo>=4.6.2
+certifi>=2024.2.2
 
 # --- Machine Learning & Statistics ---
 scikit-learn>=1.4.1

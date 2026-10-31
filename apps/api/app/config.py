@@ -33,6 +33,19 @@ class Settings(BaseSettings):
     REMINDER_TIMEZONE: str = "Asia/Kolkata"
     LINKING_TOKEN_EXPIRE_MINUTES: int = 30
 
+    # Google OAuth & Authentication Settings
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI: str = "http://localhost:5173/api/auth/callback/google"
+    JWT_SECRET: str = "super_secret_expense_manager_jwt_key_2026_xyz987"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_DAYS: int = 7
+    FRONTEND_URL: str = "http://localhost:5173"
+
+    # MongoDB Atlas Settings
+    MONGODB_URI: str = ""
+    MONGODB_DATABASE: str = "healthCare"
+
     # CORS configuration for React / Vite development
     CORS_ORIGINS: list[str] = [
         "http://localhost:5173",

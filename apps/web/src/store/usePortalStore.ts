@@ -60,7 +60,21 @@ export const usePortalStore = create<PortalState>((set, get) => ({
     try {
       const patients = await portalApi.fetchPatients();
       const savedId = localStorage.getItem(STORAGE_KEY);
-      let active = patients.find((p) => p.patient_id === savedId) || patients[0] || null;
+      let active = patients.find((p) => p.patient_id === savedId);
+      if (!active && savedId) {
+        try {
+          const fetched = await portalApi.fetchPatientById(savedId);
+          if (fetched) {
+            active = fetched;
+            patients.unshift(fetched);
+          }
+        } catch (e) {
+          // Fall back to first patient
+        }
+      }
+      if (!active) {
+        active = patients[0] || null;
+      }
 
       set({ patients, currentPatient: active, isLoading: false });
 
