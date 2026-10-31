@@ -74,7 +74,8 @@ class ReminderSchedulerService:
         """Invoked by APScheduler when the scheduled time arrives."""
         logger.info("Executing scheduled daily patient reminder sweep...")
         try:
-            result = await execute_daily_reminder_sweep()
+            # Enforce dry_run=True so automatic background sweeps never send unsolicited live messages
+            result = await execute_daily_reminder_sweep(dry_run=True)
             self.last_run_at = datetime.now()
             self.last_result = result
             logger.info(
