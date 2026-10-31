@@ -71,13 +71,62 @@ class PatientSummarySchema(BaseModel):
     gender: str
     contact_phone: Optional[str] = None
     condition_summary: Optional[str] = None
-    risk_tier: str
+    risk_tier: str = "Low"
     assigned_worker: Optional[str] = None
-    consent_given: bool
+    consent_given: bool = True
+    consent_updated_at: Optional[str] = None
     follow_up_due_date: str
-    follow_up_type: str
+    follow_up_type: str = "Routine Check-in"
     telegram_username: Optional[str] = None
     telegram_chat_id: Optional[int] = None
-    telegram_linked: bool
-    telegram_opt_in: bool
+    telegram_linked: bool = False
+    telegram_opt_in: bool = True
     telegram_linked_at: Optional[str] = None
+    reminder_window: Optional[str] = "09:00 AM"
+    notify_upcoming: Optional[bool] = True
+    notify_overdue: Optional[bool] = True
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+
+class PatientCreateRequest(BaseModel):
+    full_name: str = Field(..., min_length=2, max_length=120)
+    age: int = Field(..., ge=1, le=125)
+    gender: str = Field(..., description="Male, Female, or Other")
+    contact_phone: Optional[str] = Field(None, max_length=30)
+    condition_summary: Optional[str] = Field(None, max_length=500)
+    risk_tier: str = Field(default="Low")
+    assigned_worker: Optional[str] = Field(default="Nurse Sunita Sharma")
+    consent_given: bool = Field(default=True)
+    follow_up_due_date: str = Field(..., description="YYYY-MM-DD")
+    follow_up_type: str = Field(default="Routine Check-in")
+    telegram_opt_in: bool = Field(default=True)
+    reminder_window: Optional[str] = Field(default="09:00 AM")
+    notify_upcoming: Optional[bool] = Field(default=True)
+    notify_overdue: Optional[bool] = Field(default=True)
+
+
+class PatientUpdateRequest(BaseModel):
+    full_name: Optional[str] = None
+    age: Optional[int] = None
+    gender: Optional[str] = None
+    contact_phone: Optional[str] = None
+    condition_summary: Optional[str] = None
+    risk_tier: Optional[str] = None
+    assigned_worker: Optional[str] = None
+    consent_given: Optional[bool] = None
+    follow_up_due_date: Optional[str] = None
+    follow_up_type: Optional[str] = None
+    telegram_opt_in: Optional[bool] = None
+    reminder_window: Optional[str] = None
+    notify_upcoming: Optional[bool] = None
+    notify_overdue: Optional[bool] = None
+
+
+class TelegramPreferencesRequest(BaseModel):
+    patient_id: str = Field(..., description="Patient ID")
+    telegram_opt_in: bool = Field(default=True)
+    reminder_window: Optional[str] = Field(default="09:00 AM")
+    notify_upcoming: Optional[bool] = Field(default=True)
+    notify_overdue: Optional[bool] = Field(default=True)
+

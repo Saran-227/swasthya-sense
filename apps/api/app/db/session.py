@@ -109,6 +109,17 @@ def init_db() -> None:
             """
         )
 
+        # Ensure preference columns exist if table was previously created
+        for col_def in [
+            ("reminder_window", "TEXT DEFAULT '09:00 AM'"),
+            ("notify_upcoming", "BOOLEAN DEFAULT 1"),
+            ("notify_overdue", "BOOLEAN DEFAULT 1"),
+        ]:
+            try:
+                cursor.execute(f"ALTER TABLE patients ADD COLUMN {col_def[0]} {col_def[1]};")
+            except sqlite3.OperationalError:
+                pass
+
         # Create indexes for high-frequency queries
         cursor.execute(
             "CREATE INDEX IF NOT EXISTS idx_patients_follow_up ON patients(follow_up_due_date, telegram_linked);"
@@ -129,6 +140,18 @@ def init_db() -> None:
         if count == 0:
             logger.info("Seeding synthetic patient cohort for SWASTHYA SENSE demonstration...")
             _seed_synthetic_patients(cursor)
+
+
+def reset_synthetic_cohort() -> None:
+    """Resets the patients and sample reminders back to clean demonstration cohort."""
+    with db_session() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM reminders;")
+        cursor.execute("DELETE FROM linking_tokens;")
+        cursor.execute("DELETE FROM patients;")
+        _seed_synthetic_patients(cursor)
+    logger.info("Synthetic patient cohort successfully re-seeded.")
+
 
 
 def _seed_synthetic_patients(cursor: sqlite3.Cursor) -> None:

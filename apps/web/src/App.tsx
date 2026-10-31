@@ -12,6 +12,9 @@ import { DataEntryPage } from './pages/DataEntryPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ModelInfoPage } from './pages/ModelInfoPage';
 import { DesignSystemPage } from './pages/DesignSystemPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { PatientProfilePage } from './pages/PatientProfilePage';
+import { OnboardingPage } from './pages/OnboardingPage';
 
 // Lazy-load pages
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
@@ -27,15 +30,18 @@ export const App: React.FC = () => {
             <Route path="/" element={<LandingPage />} />
           </Route>
 
-          {/* Clinical Assessment Stepper (Steps 1-4) */}
+          {/* Patient Portal & Clinical Assessment Experience */}
           <Route element={<WizardLayout />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/profile" element={<PatientProfilePage />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/welcome" element={<WelcomePage />} />
             <Route path="/enter-data" element={<DataEntryPage />} />
             <Route path="/results" element={<ResultsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/model-info" element={<ModelInfoPage />} />
             <Route path="/design-system" element={<DesignSystemPage />} />
-            <Route path="*" element={<Navigate to="/welcome" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>
         </Routes>
       </Suspense>
