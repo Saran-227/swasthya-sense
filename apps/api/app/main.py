@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from apps.api.app.config import settings
+from apps.api.app.auth import auth_router
 from apps.api.app.db.session import init_db
 from apps.api.app.integrations.telegram.bot import bot_service
 from apps.api.app.integrations.telegram.router import telegram_router
@@ -99,6 +100,8 @@ from fastapi.responses import JSONResponse, FileResponse
 
 # Mount Routers (both /api and /api/v1 prefixes supported for seamless integration)
 app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(auth_router, prefix="/api")
+app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(telegram_router, prefix="/api")
 app.include_router(telegram_router, prefix=settings.API_V1_STR)
 

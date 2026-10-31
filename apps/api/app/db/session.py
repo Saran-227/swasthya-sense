@@ -109,11 +109,31 @@ def init_db() -> None:
             """
         )
 
-        # Ensure preference columns exist if table was previously created
+        # 4. Users Table (Google Authentication & Account Binding)
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                user_id TEXT PRIMARY KEY,
+                google_id TEXT UNIQUE,
+                email TEXT UNIQUE NOT NULL,
+                full_name TEXT NOT NULL,
+                picture TEXT,
+                patient_id TEXT UNIQUE,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY (patient_id) REFERENCES patients(patient_id) ON DELETE SET NULL
+            );
+            """
+        )
+
+        # Ensure preference and user linking columns exist if table was previously created
         for col_def in [
             ("reminder_window", "TEXT DEFAULT '09:00 AM'"),
             ("notify_upcoming", "BOOLEAN DEFAULT 1"),
             ("notify_overdue", "BOOLEAN DEFAULT 1"),
+            ("user_id", "TEXT"),
+            ("email", "TEXT"),
+            ("profile_picture", "TEXT"),
         ]:
             try:
                 cursor.execute(f"ALTER TABLE patients ADD COLUMN {col_def[0]} {col_def[1]};")
@@ -132,6 +152,12 @@ def init_db() -> None:
         )
         cursor.execute(
             "CREATE INDEX IF NOT EXISTS idx_tokens_patient ON linking_tokens(patient_id, used);"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_users_google ON users(google_id);"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);"
         )
 
         # Check if synthetic seed data is required

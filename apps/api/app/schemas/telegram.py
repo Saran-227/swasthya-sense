@@ -85,6 +85,9 @@ class PatientSummarySchema(BaseModel):
     reminder_window: Optional[str] = "09:00 AM"
     notify_upcoming: Optional[bool] = True
     notify_overdue: Optional[bool] = True
+    user_id: Optional[str] = None
+    email: Optional[str] = None
+    profile_picture: Optional[str] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
 
@@ -104,6 +107,9 @@ class PatientCreateRequest(BaseModel):
     reminder_window: Optional[str] = Field(default="09:00 AM")
     notify_upcoming: Optional[bool] = Field(default=True)
     notify_overdue: Optional[bool] = Field(default=True)
+    user_id: Optional[str] = Field(default=None, description="Linked Google User ID")
+    email: Optional[str] = Field(default=None, description="Patient Email Address")
+    profile_picture: Optional[str] = Field(default=None, description="Patient Avatar / Profile Picture URL")
 
 
 class PatientUpdateRequest(BaseModel):

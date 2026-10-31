@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePortalStore } from '../store/usePortalStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { GoogleLoginButton } from '../components/auth/GoogleLoginButton';
 import { TelegramSetupWizard } from '../components/portal/TelegramSetupWizard';
 import type { ReminderRecord } from '../types/portal';
 import {
@@ -19,10 +21,12 @@ import {
   Info,
   Radio,
   Sparkles,
+  Lock,
 } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuthStore();
   const {
     currentPatient,
     reminders,
@@ -97,41 +101,110 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+      {/* Google Authentication Sign-In Callout (if guest/demo mode) */}
+      {!isAuthenticated && (
+        <div
+          className="rounded-lg p-4 sm:p-5 border flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
+          style={{
+            background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.07), rgba(16, 185, 129, 0.05))',
+            borderColor: 'var(--bd)',
+          }}
+        >
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Sparkles size={15} style={{ color: 'var(--acc)' }} />
+              <span className="text-xs font-bold" style={{ color: 'var(--ink)' }}>
+                Sign in with Google to Link Your Patient Record
+              </span>
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono" style={{ backgroundColor: 'var(--hov)', color: 'var(--acc)' }}>
+                Instant Patient ID
+              </span>
+            </div>
+            <p className="text-xs max-w-xl" style={{ color: 'var(--mut)' }}>
+              Register or sign in with your Google account. You will automatically receive a unique Patient ID, your medical records will be securely stored, and this dashboard will reflect your personalized health profile.
+            </p>
+          </div>
+          <GoogleLoginButton size="md" label="Sign in with Google" />
+        </div>
+      )}
+
       {/* Patient Greeting & Status Banner */}
       <div
         className="rounded-lg p-5 sm:p-6 border flex flex-col sm:flex-row sm:items-center justify-between gap-4"
         style={{ backgroundColor: 'var(--panel)', borderColor: 'var(--bd)' }}
       >
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span
-              className="text-[10px] font-mono uppercase tracking-wide px-2 py-0.5 rounded"
-              style={{ backgroundColor: 'var(--hov)', color: 'var(--acc)' }}
+        <div className="flex items-start gap-4">
+          {isAuthenticated && user?.picture ? (
+            <img
+              src={user.picture}
+              alt={currentPatient.full_name}
+              className="w-14 h-14 rounded-full object-cover border-2 shadow-sm flex-shrink-0 mt-1"
+              style={{ borderColor: 'var(--acc)' }}
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 mt-1 shadow-sm"
+              style={{ backgroundColor: 'var(--acc)', color: 'var(--onacc)' }}
             >
-              Patient Portal • SWASTHYA SENSE
-            </span>
-            <span
-              className="px-2 py-0.5 rounded text-[10px] font-mono uppercase font-semibold"
-              style={{
-                backgroundColor: 'var(--hov)',
-                color:
-                  currentPatient.risk_tier === 'High'
-                    ? 'var(--high)'
-                    : currentPatient.risk_tier === 'Moderate'
-                    ? 'var(--mod)'
-                    : 'var(--low)',
-                border: '1px solid var(--bd)',
-              }}
-            >
-              {currentPatient.risk_tier} Risk
-            </span>
+              {currentPatient.full_name.charAt(0).toUpperCase()}
+            </div>
+          )}
+
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className="text-[10px] font-mono uppercase tracking-wide px-2 py-0.5 rounded"
+                style={{ backgroundColor: 'var(--hov)', color: 'var(--acc)' }}
+              >
+                Patient Portal • SWASTHYA SENSE
+              </span>
+              <span
+                className="px-2 py-0.5 rounded text-[10px] font-mono uppercase font-semibold"
+                style={{
+                  backgroundColor: 'var(--hov)',
+                  color:
+                    currentPatient.risk_tier === 'High'
+                      ? 'var(--high)'
+                      : currentPatient.risk_tier === 'Moderate'
+                      ? 'var(--mod)'
+                      : 'var(--low)',
+                  border: '1px solid var(--bd)',
+                }}
+              >
+                {currentPatient.risk_tier} Risk
+              </span>
+              <span
+                className="px-2 py-0.5 rounded text-[10px] font-mono font-bold"
+                style={{
+                  backgroundColor: 'var(--hov)',
+                  color: 'var(--ink)',
+                  border: '1px solid var(--bd)',
+                }}
+                title="Assigned Unique Patient ID"
+              >
+                ID: {currentPatient.patient_id}
+              </span>
+            </div>
+
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight" style={{ color: 'var(--ink)' }}>
+              Welcome back, {currentPatient.full_name}
+            </h1>
+
+            <div className="flex flex-wrap items-center gap-3 text-xs" style={{ color: 'var(--mut)' }}>
+              <span>
+                Assigned Care Worker: <strong>{currentPatient.assigned_worker || 'Nurse Sunita Sharma'}</strong>
+              </span>
+              {isAuthenticated && user?.email && (
+                <>
+                  <span>•</span>
+                  <span className="font-mono text-[11px] text-emerald-600 dark:text-emerald-400">
+                    Google Account: {user.email}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight" style={{ color: 'var(--ink)' }}>
-            Welcome back, {currentPatient.full_name}
-          </h1>
-          <p className="text-xs" style={{ color: 'var(--mut)' }}>
-            Assigned Care Worker: <strong>{currentPatient.assigned_worker || 'Nurse Sunita Sharma'}</strong>
-          </p>
         </div>
 
         {/* Profile Completion Indicator */}

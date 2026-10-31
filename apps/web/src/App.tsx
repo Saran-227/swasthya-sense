@@ -15,6 +15,7 @@ import { DesignSystemPage } from './pages/DesignSystemPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { PatientProfilePage } from './pages/PatientProfilePage';
 import { OnboardingPage } from './pages/OnboardingPage';
+import { AuthCallbackPage } from './pages/AuthCallbackPage';
 
 // Lazy-load pages
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
@@ -25,6 +26,10 @@ export const App: React.FC = () => {
     <BrowserRouter>
       <Suspense fallback={null}>
         <Routes>
+          {/* OAuth Callback Handlers */}
+          <Route path="/api/auth/callback/google" element={<AuthCallbackPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+
           {/* Standalone Landing Page (Task 2.1 - 2.2) */}
           <Route element={<LandingLayout />}>
             <Route path="/" element={<LandingPage />} />

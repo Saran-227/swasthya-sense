@@ -39,6 +39,7 @@ from apps.api.app.schemas.telegram import (
     TriggerReminderRequest,
     UnlinkAccountRequest,
 )
+from apps.api.app.services.mongodb_service import mongodb_service
 from apps.api.app.services.reminder_scheduler import reminder_scheduler
 from apps.api.app.services.reminder_service import (
     dispatch_single_reminder,
@@ -308,8 +309,9 @@ def api_create_patient(req: PatientCreateRequest) -> PatientSummarySchema:
                 follow_up_due_date, follow_up_type, telegram_username, telegram_chat_id,
                 telegram_linked, telegram_linked_at, telegram_opt_in,
                 reminder_window, notify_upcoming, notify_overdue,
+                user_id, email, profile_picture,
                 created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """,
             (
                 new_id,
@@ -332,14 +334,25 @@ def api_create_patient(req: PatientCreateRequest) -> PatientSummarySchema:
                 req.reminder_window or "09:00 AM",
                 1 if req.notify_upcoming else 0,
                 1 if req.notify_overdue else 0,
+                req.user_id,
+                req.email,
+                req.profile_picture,
                 now_iso,
                 now_iso,
             ),
         )
 
+        # If user_id is provided, associate in users table if not already linked
+        if req.user_id:
+            cursor.execute("UPDATE users SET patient_id = ? WHERE user_id = ? AND (patient_id IS NULL OR patient_id = '');", (new_id, req.user_id))
+
         cursor.execute("SELECT * FROM patients WHERE patient_id = ?;", (new_id,))
         row = cursor.fetchone()
-        return PatientSummarySchema(**dict(row))
+        patient_dict = dict(row)
+
+    # Sync to MongoDB Atlas
+    mongodb_service.sync_patient(patient_dict)
+    return PatientSummarySchema(**patient_dict)
 
 
 @telegram_router.put(
@@ -398,7 +411,11 @@ def api_update_patient(patient_id: str, req: PatientUpdateRequest) -> PatientSum
 
         cursor.execute("SELECT * FROM patients WHERE patient_id = ?;", (patient_id,))
         updated_row = cursor.fetchone()
-        return PatientSummarySchema(**dict(updated_row))
+        updated_dict = dict(updated_row)
+
+    # Sync to MongoDB Atlas
+    mongodb_service.sync_patient(updated_dict)
+    return PatientSummarySchema(**updated_dict)
 
 
 @telegram_router.post(
@@ -434,6 +451,11 @@ def api_save_telegram_preferences(req: TelegramPreferencesRequest) -> dict[str, 
                 req.patient_id,
             ),
         )
+
+        cursor.execute("SELECT * FROM patients WHERE patient_id = ?;", (req.patient_id,))
+        p_row = cursor.fetchone()
+        if p_row:
+            mongodb_service.sync_patient(dict(p_row))
 
         return {
             "success": True,
