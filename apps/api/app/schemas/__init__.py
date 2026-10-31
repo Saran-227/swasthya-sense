@@ -15,6 +15,17 @@ from apps.api.app.schemas.xai import (
 
 from apps.api.app.schemas.report import ReportRequestSchema, ReportsResponseSchema
 
+from apps.api.app.schemas.telegram import (
+    CreateLinkingTokenRequest,
+    CreateLinkingTokenResponse,
+    RedeemTokenRequest,
+    UnlinkAccountRequest,
+    TelegramStatusResponse,
+    TriggerReminderRequest,
+    ReminderRecordSchema,
+    PatientSummarySchema,
+)
+
 __all__ = [
     "HealthResponse",
     "ErrorResponse",
@@ -29,4 +40,12 @@ __all__ = [
     "CompleteAnalysisResponse",
     "ReportRequestSchema",
     "ReportsResponseSchema",
+    "CreateLinkingTokenRequest",
+    "CreateLinkingTokenResponse",
+    "RedeemTokenRequest",
+    "UnlinkAccountRequest",
+    "TelegramStatusResponse",
+    "TriggerReminderRequest",
+    "ReminderRecordSchema",
+    "PatientSummarySchema",
 ]

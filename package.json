@@ -1,7 +1,7 @@
 {
-  "name": "perfusion3d-cad",
+  "name": "swasthya-sense",
   "version": "1.0.0",
-  "description": "Perfusion3D: Real-Time Spatial Coronary Digital Twin & Multi-Vessel Ischemia Telemetry (Track A - Multimodal AI Hackathon 2026)",
+  "description": "SWASTHYA SENSE: Early Warning and Follow-up for High-Risk Patients. Smart Follow-up. Timely Attention. Better Care.",
   "private": true,
   "type": "module",
   "scripts": {

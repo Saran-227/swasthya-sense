@@ -11,6 +11,7 @@ __pycache__/
 .Python
 env/
 venv/
+.venv
 .venv/
 ENV/
 build/
@@ -35,6 +36,7 @@ htmlcov/
 .ruff_cache/
 
 # --- Node & Frontend Build Artifacts ---
+node_modules
 node_modules/
 npm-debug.log*
 yarn-debug.log*
@@ -56,6 +58,8 @@ apps/web/dist-ssr/
 .env.production.local
 *.pem
 *.key
+*.db
+*.sqlite3
 
 # --- 3D Assets & CAD Intermediate Files ---
 # Exclude heavy raw meshes, blender source backups, and uncompressed geometry

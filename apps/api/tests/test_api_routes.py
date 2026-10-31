@@ -18,14 +18,14 @@ def client():
 
 
 def test_health_endpoints(client):
-    """Verify both root and API v1 healthcheck endpoints return operational readiness and Perfusion3D metadata."""
+    """Verify both root and API v1 healthcheck endpoints return operational readiness and SWASTHYA SENSE metadata."""
     res_root = client.get("/health")
     assert res_root.status_code == 200
     data_root = res_root.json()
     assert data_root["status"] == "READY"
-    assert data_root["service"] == "Perfusion3D API"
+    assert data_root["service"] == "SWASTHYA SENSE API"
     assert "disclaimer" in data_root
-    assert res_root.headers.get("X-Application-Name") == "Perfusion3D"
+    assert res_root.headers.get("X-Application-Name") == "SWASTHYA SENSE"
     assert res_root.headers.get("X-Clinical-Decision-Support") == "True"
     assert res_root.headers.get("X-SaMD-Category") == "Class-IIa-Educational-Prototype"
 
@@ -33,10 +33,10 @@ def test_health_endpoints(client):
     assert res_v1.status_code == 200
     data_v1 = res_v1.json()
     assert data_v1["status"] == "READY"
-    assert data_v1["service"] == "Perfusion3D API"
+    assert data_v1["service"] == "SWASTHYA SENSE API"
     assert data_v1["feature_count"] == 55
     assert set(data_v1["models_loaded"]) == {"CAD", "LAD", "LCX", "RCA"}
-    assert res_v1.headers.get("X-Application-Name") == "Perfusion3D"
+    assert res_v1.headers.get("X-Application-Name") == "SWASTHYA SENSE"
 
 
 def test_get_sample_patient(client):

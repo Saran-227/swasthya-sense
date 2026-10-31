@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Perfusion3D | Coronary artery risk on a 3D heart</title>
-    <meta name="description" content="Estimates the likelihood of coronary artery narrowing from clinical measurements and shows the result on a 3D heart." />
+    <title>SWASTHYA SENSE | Smart Follow-up. Timely Attention. Better Care.</title>
+    <meta name="description" content="SWASTHYA SENSE — Privacy-conscious patient follow-up, early warning indicators, and automated health worker reminders." />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0C1A13" />
 
@@ -17,7 +17,7 @@
     <script>
       (function() {
         try {
-          var pref = localStorage.getItem('perfusion3d-theme') || 'system';
+          var pref = localStorage.getItem('swasthya-sense-theme') || localStorage.getItem('perfusion3d-theme') || 'system';
           var theme = pref;
           if (pref === 'system' || !pref) {
             theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';

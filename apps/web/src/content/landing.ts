@@ -7,7 +7,7 @@ export const highThreshold = Math.round(RISK_BANDS.High.minProb * 100); // Inter
 
 export const LANDING_COPY = {
   nav: {
-    wordmark: 'Perfusion3D',
+    wordmark: 'SWASTHYA SENSE',
     links: [
       { id: 'how-it-works', label: 'How it works' },
       { id: 'what-you-get', label: 'How this helps you' },
@@ -18,14 +18,14 @@ export const LANDING_COPY = {
     startAssessmentShort: 'Start',
   },
   hero: {
-    title: 'Explore your heart health in 3D',
-    lead: 'A clear, visual tool that turns health measurements and test reports into an interactive 3D model of your heart arteries. Understand key risk factors and get clear summaries to share with your doctor.',
+    title: 'Smart Follow-up. Timely Attention. Better Care.',
+    lead: 'SWASTHYA SENSE is a privacy-conscious early-warning and patient follow-up platform. It equips frontline health workers with scheduled check-in tracking, transparent risk flags, interactive anatomical visualization, and automated Telegram reminders.',
     startAssessment: 'Start assessment',
     howItWorks: 'See how it works',
     facts: [
-      { value: '3D Heart', label: 'Interactive visualization' },
-      { value: 'Key Factors', label: 'Clear explanations' },
-      { value: 'Doctor-Ready', label: 'Printable summaries' },
+      { value: 'Smart Reminders', label: 'Automated Telegram alerts' },
+      { value: 'Early Warning', label: 'Transparent risk flags' },
+      { value: '3D Heart Twin', label: 'Anatomical visualization' },
     ],
     sampleBlock: {
       heading: 'Try an interactive sample',

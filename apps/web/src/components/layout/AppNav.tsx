@@ -8,6 +8,7 @@ import { Trace } from '../ui/Trace';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { SecondaryButton } from '../ui/SecondaryButton';
 import { QuietButton } from '../ui/QuietButton';
+import { PatientSwitcher } from '../portal/PatientSwitcher';
 
 export interface AppNavProps {
   // Optional override for design system preview
@@ -85,7 +86,7 @@ export const AppNav: React.FC<AppNavProps> = ({ forceStep, forceState }) => {
             textDecoration: 'none',
             color: 'inherit',
           }}
-          aria-label="Perfusion3D Home"
+          aria-label="SWASTHYA SENSE Home"
         >
           <Trace width={36} height={16} className="trace-initial" />
           <span
@@ -96,68 +97,109 @@ export const AppNav: React.FC<AppNavProps> = ({ forceStep, forceState }) => {
               color: 'var(--ink)',
             }}
           >
-            Perfusion3D
+            SWASTHYA SENSE
           </span>
         </Link>
 
         {/* Task 2.3 CENTER zone (>=900px) */}
         <nav aria-label="Progress" className="nav-center-zone">
-          <ol
-            style={{
-              display: 'flex',
-              gap: '2px',
-              listStyle: 'none',
-              margin: 0,
-              padding: 0,
-              height: '100%',
-              alignItems: 'center',
-            }}
-          >
-            {WIZARD_STEPS.map((s) => {
-              const isCompleted = currentStepNumber > s.step;
-              const isCurrent = currentStepNumber === s.step;
-              const isUpcoming = currentStepNumber < s.step;
+          {isWizardStep ? (
+            <ol
+              style={{
+                display: 'flex',
+                gap: '2px',
+                listStyle: 'none',
+                margin: 0,
+                padding: 0,
+                height: '100%',
+                alignItems: 'center',
+              }}
+            >
+              {WIZARD_STEPS.map((s) => {
+                const isCompleted = currentStepNumber > s.step;
+                const isCurrent = currentStepNumber === s.step;
+                const isUpcoming = currentStepNumber < s.step;
 
-              // Animation class on forward transition
-              let barAnimClass = '';
-              if (animatingSteps) {
-                if (s.step === animatingSteps.completedStep) {
-                  barAnimClass = 'bar-grow';
-                } else if (s.step === animatingSteps.currentStep) {
-                  barAnimClass = 'bar-grow-delayed';
+                // Animation class on forward transition
+                let barAnimClass = '';
+                if (animatingSteps) {
+                  if (s.step === animatingSteps.completedStep) {
+                    barAnimClass = 'bar-grow';
+                  } else if (s.step === animatingSteps.currentStep) {
+                    barAnimClass = 'bar-grow-delayed';
+                  }
                 }
-              }
 
-              let stateClass = 'upcoming';
-              if (isCurrent) stateClass = 'current';
-              else if (isCompleted) stateClass = 'completed';
+                let stateClass = 'upcoming';
+                if (isCurrent) stateClass = 'current';
+                else if (isCompleted) stateClass = 'completed';
 
-              if (forceState) {
-                stateClass = forceState;
-              }
+                if (forceState) {
+                  stateClass = forceState;
+                }
 
-              return (
-                <li key={s.step} style={{ height: '100%', display: 'flex' }}>
-                  <button
-                    type="button"
-                    className={`nav-step-item-btn ${stateClass} ${barAnimClass}`}
-                    onClick={() => handleStepClick(s.step, s.path)}
-                    disabled={isCurrent || (isUpcoming && s.step !== 1 && !isStepUnlocked(s.step))}
-                    aria-current={isCurrent ? 'step' : undefined}
-                    aria-disabled={isUpcoming && s.step !== 1 && !isStepUnlocked(s.step) ? 'true' : undefined}
-                    tabIndex={isUpcoming && s.step !== 1 && !isStepUnlocked(s.step) ? -1 : 0}
+                return (
+                  <li key={s.step} style={{ height: '100%', display: 'flex' }}>
+                    <button
+                      type="button"
+                      className={`nav-step-item-btn ${stateClass} ${barAnimClass}`}
+                      onClick={() => handleStepClick(s.step, s.path)}
+                      disabled={isCurrent || (isUpcoming && s.step !== 1 && !isStepUnlocked(s.step))}
+                      aria-current={isCurrent ? 'step' : undefined}
+                      aria-disabled={isUpcoming && s.step !== 1 && !isStepUnlocked(s.step) ? 'true' : undefined}
+                      tabIndex={isUpcoming && s.step !== 1 && !isStepUnlocked(s.step) ? -1 : 0}
+                    >
+                      <span className="nav-step-num">{s.step}</span>
+                      <span>{s.label}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          ) : (
+            <div className="flex items-center gap-1.5 h-full">
+              {[
+                { path: '/dashboard', label: 'Dashboard' },
+                { path: '/profile', label: 'Profile & Reminders' },
+                { path: '/onboarding', label: 'Onboarding' },
+                { path: '/welcome', label: '3D Assessment' },
+              ].map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className="px-3 py-1.5 rounded text-xs transition-colors flex items-center"
+                    style={{
+                      backgroundColor: isActive ? 'var(--hov)' : 'transparent',
+                      color: isActive ? 'var(--acc)' : 'var(--mut)',
+                      fontWeight: isActive ? 600 : 500,
+                      border: isActive ? '1px solid var(--bd)' : '1px solid transparent',
+                    }}
                   >
-                    <span className="nav-step-num">{s.step}</span>
-                    <span>{s.label}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </nav>
 
         {/* Task 2.4 RIGHT zone */}
-        <div style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <PatientSwitcher />
+
+          {/* If inside clinical wizard, quick jump back to patient dashboard */}
+          {isWizardStep && (
+            <Link
+              to="/dashboard"
+              className="hidden lg:inline-flex px-2 py-1 rounded text-[11px] font-medium border"
+              style={{ borderColor: 'var(--bd)', color: 'var(--mut)', backgroundColor: 'var(--hov)' }}
+            >
+              Dashboard
+            </Link>
+          )}
+
           {/* a) Theme toggle button */}
           <button
             type="button"

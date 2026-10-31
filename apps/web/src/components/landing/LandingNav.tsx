@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Trace } from '../ui/Trace';
 import { PrimaryButton } from '../ui/PrimaryButton';
 import { QuietButton } from '../ui/QuietButton';
@@ -117,7 +117,7 @@ export const LandingNav: React.FC = () => {
             textDecoration: 'none',
             color: 'inherit',
           }}
-          aria-label="Perfusion3D Home"
+          aria-label="SWASTHYA SENSE Home"
         >
           <Trace width={36} height={16} className="trace-initial" />
           <span
@@ -185,6 +185,19 @@ export const LandingNav: React.FC = () => {
             )}
           </button>
 
+          {/* Patient Portal / Dashboard Link */}
+          <Link
+            to="/dashboard"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold border transition-colors"
+            style={{
+              backgroundColor: 'var(--panel)',
+              borderColor: 'var(--bd)',
+              color: 'var(--ink)',
+            }}
+          >
+            Dashboard
+          </Link>
+
           <PrimaryButton
             size="md"
             onClick={handleStartAssessment}
@@ -237,6 +250,34 @@ export const LandingNav: React.FC = () => {
             gap: '8px',
           }}
         >
+          <Link
+            to="/dashboard"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="px-3 py-2.5 rounded text-sm font-semibold flex items-center justify-between border"
+            style={{ backgroundColor: 'var(--hov)', borderColor: 'var(--bd)', color: 'var(--ink)' }}
+          >
+            <span>Patient Dashboard</span>
+            <ArrowRight size={14} />
+          </Link>
+          <Link
+            to="/profile"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="px-3 py-2 rounded text-xs font-medium border"
+            style={{ backgroundColor: 'var(--panel)', borderColor: 'var(--bd)', color: 'var(--ink)' }}
+          >
+            My Profile & Telegram Reminders
+          </Link>
+          <Link
+            to="/onboarding"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="px-3 py-2 rounded text-xs font-medium border"
+            style={{ backgroundColor: 'var(--panel)', borderColor: 'var(--bd)', color: 'var(--ink)' }}
+          >
+            + Register New Patient
+          </Link>
+
+          <div className="border-t my-1" style={{ borderColor: 'var(--bd)' }} />
+
           {LANDING_COPY.nav.links.map((link) => {
             const isCurrent = activeSection === link.id;
             return (
@@ -245,7 +286,7 @@ export const LandingNav: React.FC = () => {
                 type="button"
                 onClick={() => handleNavClick(link.id)}
                 style={{
-                  height: '44px',
+                  height: '40px',
                   display: 'flex',
                   alignItems: 'center',
                   padding: '0 12px',
@@ -255,7 +296,7 @@ export const LandingNav: React.FC = () => {
                   borderColor: isCurrent ? 'var(--bd)' : 'transparent',
                   color: isCurrent ? 'var(--ink)' : 'var(--mut)',
                   fontFamily: 'var(--fs)',
-                  fontSize: '14px',
+                  fontSize: '13px',
                   fontWeight: isCurrent ? 600 : 500,
                   textAlign: 'left',
                   cursor: 'pointer',

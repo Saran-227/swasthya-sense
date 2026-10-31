@@ -191,7 +191,7 @@ export const ModelInfoPage: React.FC = () => {
               marginBottom: 0,
             }}
           >
-            Performance metrics, feature specifications, and data leakage safeguards for Perfusion3D.
+            Performance metrics, feature specifications, and data leakage safeguards for SWASTHYA SENSE.
           </p>
         </div>
 

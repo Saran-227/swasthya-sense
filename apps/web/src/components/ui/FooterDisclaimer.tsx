@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 export const MANDATORY_DISCLAIMER =
-  'DECISION SUPPORT ONLY: This system is an investigational AI prototype for clinical decision support and research. Predictions and 3D visualizations DO NOT constitute formal medical diagnosis or replace invasive coronary angiography or diagnostic imaging.';
+  'DECISION SUPPORT ONLY: SWASTHYA SENSE is an early-warning and follow-up decision support platform for high-risk patients. Predictions, reminders, and 3D visualizations do NOT constitute formal medical diagnoses and must remain under qualified clinician supervision.';
 
 export const FooterDisclaimer: React.FC<{ className?: string }> = ({ className = '' }) => {
   return (

@@ -3,7 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 export type ThemePreference = 'system' | 'light' | 'dark';
 export type ResolvedTheme = 'light' | 'dark';
 
-const STORAGE_KEY = 'perfusion3d-theme';
+const STORAGE_KEY = 'swasthya-sense-theme';
+const LEGACY_STORAGE_KEY = 'perfusion3d-theme';
 
 function getSystemTheme(): ResolvedTheme {
   if (typeof window === 'undefined') return 'light';
@@ -13,7 +14,7 @@ function getSystemTheme(): ResolvedTheme {
 function getInitialPreference(): ThemePreference {
   if (typeof window === 'undefined') return 'system';
   try {
-    const saved = localStorage.getItem(STORAGE_KEY) as ThemePreference;
+    const saved = (localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY)) as ThemePreference;
     if (saved === 'light' || saved === 'dark' || saved === 'system') {
       return saved;
     }

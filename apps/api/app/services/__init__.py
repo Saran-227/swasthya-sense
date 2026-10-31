@@ -16,6 +16,14 @@ from apps.api.app.services.report_templates import (
     MANDATORY_DISCLAIMER,
 )
 
+from apps.api.app.services.reminder_service import (
+    fetch_reminder_recipients,
+    dispatch_single_reminder,
+    execute_daily_reminder_sweep,
+    get_patient_reminder_history,
+)
+from apps.api.app.services.reminder_scheduler import reminder_scheduler
+
 __all__ = [
     "model_service",
     "predict_patient",
@@ -27,4 +35,9 @@ __all__ = [
     "generate_deterministic_technical_report",
     "generate_deterministic_patient_report",
     "MANDATORY_DISCLAIMER",
+    "fetch_reminder_recipients",
+    "dispatch_single_reminder",
+    "execute_daily_reminder_sweep",
+    "get_patient_reminder_history",
+    "reminder_scheduler",
 ]

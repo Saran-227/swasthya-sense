@@ -124,7 +124,7 @@ export const WelcomePage: React.FC = () => {
               margin: 0,
             }}
           >
-            Welcome to Perfusion3D
+            Welcome to SWASTHYA SENSE
           </h1>
 
           {/* Customer-friendly Lead Paragraph */}
@@ -140,7 +140,7 @@ export const WelcomePage: React.FC = () => {
               opacity: 0.9,
             }}
           >
-            A visual way to explore heart artery health and prepare for your doctor&apos;s appointment. Enter routine health measurements or upload test reports to see an interactive 3D model of your heart&apos;s main arteries.
+            Smart Follow-up. Timely Attention. Better Care. A privacy-conscious early-warning and patient follow-up platform empowering frontline health workers and patients with timely check-ins, automated reminders, and interactive risk visualization.
           </p>
 
           {/* Customer Orientation: 3 Simple Steps */}

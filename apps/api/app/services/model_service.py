@@ -67,11 +67,38 @@ class ModelService:
             logger.info(f"Loaded calibrated model head: {target.upper()}")
 
         # 3. Load TreeSHAP Explainers
+        loaded_shap = False
         if shap_path.exists():
-            self.shap_bundle = joblib.load(shap_path)
-            logger.info("Loaded TreeSHAP explainers for all 4 targets.")
-        else:
-            logger.warning(f"SHAP explainers bundle not found at {shap_path}.")
+            try:
+                self.shap_bundle = joblib.load(shap_path)
+                logger.info("Loaded TreeSHAP explainers for all 4 targets.")
+                loaded_shap = True
+            except Exception as e:
+                logger.warning(f"Could not unpickle pre-serialized SHAP bundle ({e}). Compiling TreeSHAP explainers dynamically...")
+
+        if not loaded_shap:
+            import shap
+            explainers = {}
+            for target in ["CAD", "LAD", "LCX", "RCA"]:
+                bundle = self.models.get(target)
+                if not bundle:
+                    continue
+                base_est = bundle.get("base_model")
+                if hasattr(base_est, "named_estimators_") and "rf" in base_est.named_estimators_:
+                    tree_est = base_est.named_estimators_["rf"]
+                elif hasattr(base_est, "estimators_") and len(base_est.estimators_) > 0:
+                    tree_est = base_est.estimators_[0]
+                else:
+                    tree_est = base_est
+                try:
+                    explainers[target] = shap.TreeExplainer(tree_est)
+                except Exception as err:
+                    logger.warning(f"Error compiling TreeExplainer for {target}: {err}")
+            self.shap_bundle = {
+                "feature_names": self.models["CAD"]["feature_names"],
+                "explainers": explainers,
+            }
+            logger.info("Dynamically compiled TreeSHAP explainers for all 4 heads.")
 
         # 4. Load Metadata
         if metadata_path.exists():
