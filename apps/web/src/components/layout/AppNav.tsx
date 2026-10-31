@@ -159,6 +159,7 @@ export const AppNav: React.FC<AppNavProps> = ({ forceStep, forceState }) => {
           ) : (
             <div className="flex items-center gap-1.5 h-full">
               {[
+                { path: '/', label: 'Home' },
                 { path: '/dashboard', label: 'Dashboard' },
                 { path: '/profile', label: 'Profile & Reminders' },
                 { path: '/onboarding', label: 'Onboarding' },
