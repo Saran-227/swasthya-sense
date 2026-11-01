@@ -41,17 +41,19 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRE_DAYS: int = 7
     FRONTEND_URL: str = "http://localhost:5173"
+    BACKEND_URL: str = "http://localhost:8000"
 
     # MongoDB Atlas Settings
     MONGODB_URI: str = ""
     MONGODB_DATABASE: str = "healthCare"
 
-    # CORS configuration for React / Vite development
+    # CORS configuration for React / Vite development and production Vercel
     CORS_ORIGINS: list[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://swasthya-sense-peach.vercel.app",
         "*",
     ]
 

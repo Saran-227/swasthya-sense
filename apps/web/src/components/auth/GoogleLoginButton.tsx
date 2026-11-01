@@ -101,8 +101,14 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   };
 
   const redirectToGoogle = () => {
-    const clientId = config?.google_client_id || '666611753013-cp94eclg8ts7i1ddlqq9eijlnqbc9qgl.apps.googleusercontent.com';
-    const redirectUri = encodeURIComponent(window.location.origin + '/api/auth/callback/google');
+    const clientId =
+      config?.google_client_id ||
+      (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID) ||
+      '666611753013-cp94eclg8ts7i1ddlqq9eijlnqbc9qgl.apps.googleusercontent.com';
+    const redirectPath =
+      (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GOOGLE_REDIRECT_PATH) ||
+      '/api/auth/callback/google';
+    const redirectUri = encodeURIComponent(window.location.origin + redirectPath);
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=consent`;
     window.location.href = authUrl;
   };

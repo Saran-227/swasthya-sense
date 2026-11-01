@@ -6,13 +6,14 @@ import { Loader2, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 export const AuthCallbackPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { loginWithCode, error } = useAuthStore();
+  const { loginWithCode, initAuth, error } = useAuthStore();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const code = searchParams.get('code');
-    const authError = searchParams.get('error');
+    const token = searchParams.get('token');
+    const authError = searchParams.get('error') || searchParams.get('error_description');
 
     if (authError) {
       setStatus('error');
@@ -20,18 +21,29 @@ export const AuthCallbackPage: React.FC = () => {
       return;
     }
 
-    if (!code) {
+    if (!code && !token) {
       setStatus('error');
-      setErrorMessage('No authorization code provided in Google callback.');
+      setErrorMessage('No authorization code or authentication token provided in Google callback.');
       return;
     }
 
     let isMounted = true;
 
-    async function handleExchange() {
+    async function handleAuth() {
       try {
-        const redirectUri = window.location.origin + '/api/auth/callback/google';
-        await loginWithCode(code!, redirectUri);
+        if (token) {
+          // Direct backend callback redirect flow with pre-issued JWT
+          localStorage.setItem('swasthya_sense_jwt_token', token);
+          await initAuth();
+        } else if (code) {
+          // Frontend authorization code exchange flow
+          // Accurately matches whichever callback path Google redirected to:
+          // e.g. https://swasthya-sense-peach.vercel.app/api/auth/callback/google
+          // or http://localhost:5173/api/auth/callback/google
+          const redirectUri = window.location.origin + window.location.pathname;
+          await loginWithCode(code, redirectUri);
+        }
+
         if (isMounted) {
           setStatus('success');
           setTimeout(() => {
@@ -46,12 +58,12 @@ export const AuthCallbackPage: React.FC = () => {
       }
     }
 
-    handleExchange();
+    handleAuth();
 
     return () => {
       isMounted = false;
     };
-  }, [searchParams, loginWithCode, navigate]);
+  }, [searchParams, loginWithCode, initAuth, navigate]);
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4">

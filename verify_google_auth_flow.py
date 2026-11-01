@@ -123,9 +123,60 @@ def test_full_google_registration_and_dashboard_flow():
         assert data2["user"]["patient_id"] == user["patient_id"], "Patient ID must remain stable"
         print("✓ Verified idempotent repeat login preserves same unique Patient ID.")
 
+
+def test_google_code_exchange_and_get_callback():
+    print("\n" + "=" * 70)
+    print("TEST: Authorization Code Exchange & Direct Backend GET Callback")
+    print("=" * 70)
+
+    unique_sub = f"google_code_sub_{uuid.uuid4().hex[:8]}"
+    test_email = f"test.code.{uuid.uuid4().hex[:6]}@gmail.com"
+    test_name = "Rajesh Verma"
+
+    mock_profile = {
+        "sub": unique_sub,
+        "email": test_email,
+        "name": test_name,
+        "picture": "https://lh3.googleusercontent.com/sample_pic_rajesh",
+        "email_verified": True,
+    }
+
+    # Test POST /api/auth/google with code & redirect_uri
+    with patch("apps.api.app.auth.router.exchange_google_code", new_callable=AsyncMock) as mock_exchange:
+        mock_exchange.return_value = mock_profile
+
+        resp = client.post(
+            "/api/auth/google",
+            json={
+                "code": "4/0Abc_Test_Auth_Code_Production_Flow",
+                "redirect_uri": "https://swasthya-sense-peach.vercel.app/api/auth/callback/google",
+            },
+        )
+        assert resp.status_code == 200, f"Code exchange failed: {resp.text}"
+        data = resp.json()
+        assert data["user"]["full_name"] == test_name
+        assert data["user"]["patient_id"].startswith("PT-SENSE-")
+        print(f"✓ Authorization Code POST exchange verified for {data['user']['patient_id']}")
+
+    # Test GET /api/auth/callback/google?code=... (Backend callback redirect)
+    with patch("apps.api.app.auth.router.exchange_google_code", new_callable=AsyncMock) as mock_exchange:
+        mock_exchange.return_value = mock_profile
+
+        get_resp = client.get(
+            "/api/auth/callback/google?code=4/0Abc_Test_Auth_Code_Production_Flow",
+            follow_redirects=False,
+        )
+        assert get_resp.status_code in (302, 307), f"Expected redirect, got {get_resp.status_code}"
+        location = get_resp.headers.get("location", "")
+        assert "token=" in location, f"Expected token in redirect location: {location}"
+        print(f"✓ Direct GET callback redirect verified: Location contains JWT token")
+
     print("\n" + "=" * 70)
     print("ALL VERIFICATION CHECKS PASSED SUCCESSFULLY!")
     print("=" * 70)
 
+
 if __name__ == "__main__":
     test_full_google_registration_and_dashboard_flow()
+    test_google_code_exchange_and_get_callback()
+

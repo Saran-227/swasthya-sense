@@ -3,7 +3,6 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "apps/web/dist",
-  "cleanUrls": true,
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -25,6 +24,14 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/api/auth/callback/google",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/auth/callback",
+      "destination": "/index.html"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

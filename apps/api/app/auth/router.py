@@ -12,6 +12,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
+from fastapi.responses import RedirectResponse
 import httpx
 import jwt
 from pydantic import BaseModel, Field
@@ -181,29 +182,17 @@ def get_auth_config() -> AuthConfigResponse:
     )
 
 
-@auth_router.post("/google", response_model=AuthResponse)
-async def authenticate_with_google(req: GoogleAuthRequest) -> AuthResponse:
+def process_google_profile(profile: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any], str, bool]:
     """
-    Authenticates or registers a user via Google OAuth2 / GIS.
-    On first login, automatically generates a unique Patient ID, creates patient record,
-    and syncs to SQLite and MongoDB Atlas.
+    Core idempotent identity binding helper.
+    Finds or registers the user, generates a unique Patient ID (PT-SENSE-XXXXXX) for new users,
+    upserts SQLite and MongoDB Atlas records, and returns (user_dict, patient_dict, jwt_token, is_new).
     """
-    if req.credential:
-        profile = await verify_google_id_token(req.credential)
-    elif req.code:
-        profile = await exchange_google_code(req.code, req.redirect_uri)
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Either 'credential' or 'code' is required for Google authentication.",
-        )
-
     google_id = profile["sub"]
     email = profile["email"].lower().strip()
     name = profile["name"]
     picture = profile.get("picture")
     now_iso = datetime.now(timezone.utc).isoformat()
-
     is_new = False
 
     with db_session() as conn:
@@ -236,7 +225,6 @@ async def authenticate_with_google(req: GoogleAuthRequest) -> AuthResponse:
                 patient_row = None
 
             if not patient_row:
-                # User had no patient record yet -> generate and link
                 patient_id = generate_unique_patient_id()
                 due_date = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
                 cursor.execute(
@@ -270,7 +258,6 @@ async def authenticate_with_google(req: GoogleAuthRequest) -> AuthResponse:
                 cursor.execute("SELECT * FROM patients WHERE patient_id = ?;", (patient_id,))
                 patient_row = cursor.fetchone()
             else:
-                # Update existing patient's email and picture
                 cursor.execute(
                     "UPDATE patients SET email = ?, profile_picture = ?, updated_at = ? WHERE patient_id = ?;",
                     (email, picture, now_iso, patient_id),
@@ -278,14 +265,16 @@ async def authenticate_with_google(req: GoogleAuthRequest) -> AuthResponse:
                 cursor.execute("SELECT * FROM patients WHERE patient_id = ?;", (patient_id,))
                 patient_row = cursor.fetchone()
 
+            user_data["full_name"] = name
+            user_data["picture"] = picture
+            user_data["patient_id"] = patient_id
+
         else:
-            # 2. Brand new user registration
             is_new = True
             user_id = f"usr_{uuid.uuid4().hex[:12]}"
             patient_id = generate_unique_patient_id()
             due_date = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
 
-            # Insert patient record
             cursor.execute(
                 """
                 INSERT INTO patients (
@@ -314,7 +303,6 @@ async def authenticate_with_google(req: GoogleAuthRequest) -> AuthResponse:
                 ),
             )
 
-            # Insert user record
             cursor.execute(
                 """
                 INSERT INTO users (
@@ -326,6 +314,14 @@ async def authenticate_with_google(req: GoogleAuthRequest) -> AuthResponse:
 
             cursor.execute("SELECT * FROM patients WHERE patient_id = ?;", (patient_id,))
             patient_row = cursor.fetchone()
+
+            user_data = {
+                "user_id": user_id,
+                "email": email,
+                "full_name": name,
+                "picture": picture,
+                "patient_id": patient_id,
+            }
 
         patient_dict = dict(patient_row)
 
@@ -341,18 +337,70 @@ async def authenticate_with_google(req: GoogleAuthRequest) -> AuthResponse:
         patient_id=patient_id,
     )
 
+    return user_data, patient_dict, token, is_new
+
+
+@auth_router.post("/google", response_model=AuthResponse)
+async def authenticate_with_google(req: GoogleAuthRequest) -> AuthResponse:
+    """
+    Authenticates or registers a user via Google OAuth2 / GIS.
+    On first login, automatically generates a unique Patient ID, creates patient record,
+    and syncs to SQLite and MongoDB Atlas.
+    """
+    if req.credential:
+        profile = await verify_google_id_token(req.credential)
+    elif req.code:
+        profile = await exchange_google_code(req.code, req.redirect_uri)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Either 'credential' or 'code' is required for Google authentication.",
+        )
+
+    user_data, patient_dict, token, is_new = process_google_profile(profile)
+
     return AuthResponse(
         token=token,
         user=UserProfileSchema(
-            user_id=user_id,
-            email=email,
-            full_name=name,
-            picture=picture,
-            patient_id=patient_id,
+            user_id=user_data["user_id"],
+            email=user_data["email"],
+            full_name=user_data["full_name"],
+            picture=user_data.get("picture"),
+            patient_id=user_data["patient_id"],
         ),
         patient=PatientSummarySchema(**patient_dict),
         is_new_registration=is_new,
     )
+
+
+@auth_router.get("/callback/google", include_in_schema=True)
+@auth_router.get("/auth/callback/google", include_in_schema=False)
+async def google_callback_get(
+    code: Optional[str] = Query(None, description="Google OAuth authorization code"),
+    error: Optional[str] = Query(None, description="OAuth error parameter if any"),
+    state: Optional[str] = Query(None, description="OAuth state parameter if any"),
+):
+    """
+    Direct Google OAuth GET callback endpoint.
+    If Google Cloud Console is configured with a backend redirect URI, this exchanges the code,
+    creates/updates the patient and user records in SQLite and MongoDB Atlas,
+    and redirects the browser to the frontend dashboard with the authenticated JWT session token.
+    """
+    frontend_url = settings.FRONTEND_URL.rstrip("/")
+    if error:
+        logger.warning(f"Google OAuth callback error received: {error}")
+        return RedirectResponse(url=f"{frontend_url}/api/auth/callback/google?error={error}")
+
+    if not code:
+        return RedirectResponse(url=f"{frontend_url}/api/auth/callback/google?error=missing_authorization_code")
+
+    try:
+        profile = await exchange_google_code(code, settings.GOOGLE_REDIRECT_URI)
+        user_data, patient_dict, token, is_new = process_google_profile(profile)
+        return RedirectResponse(url=f"{frontend_url}/api/auth/callback/google?token={token}")
+    except Exception as e:
+        logger.error(f"Google OAuth callback processing error: {e}", exc_info=True)
+        return RedirectResponse(url=f"{frontend_url}/api/auth/callback/google?error=auth_processing_failed")
 
 
 @auth_router.get("/me", response_model=AuthResponse)
