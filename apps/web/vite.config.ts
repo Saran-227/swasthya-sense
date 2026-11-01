@@ -14,6 +14,7 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    strictPort: true,
     host: '0.0.0.0',
     proxy: {
       '/api': {
@@ -21,6 +22,10 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+  },
+  preview: {
+    port: 5173,
+    strictPort: true,
   },
   build: {
     outDir: path.resolve(__dirname, 'dist'),
