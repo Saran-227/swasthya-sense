@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently -n \"API,WEB\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run dev:api\" \"npm run dev:web\"",
-    "dev:api": "python -m uvicorn apps.api.app.main:app --host 127.0.0.1 --port 8000 --reload",
+    "dev:api": "([ -f .venv/bin/uvicorn ] && .venv/bin/uvicorn apps.api.app.main:app --host 127.0.0.1 --port 8000 --reload) || python3 -m uvicorn apps.api.app.main:app --host 127.0.0.1 --port 8000 --reload || python -m uvicorn apps.api.app.main:app --host 127.0.0.1 --port 8000 --reload",
     "dev:web": "vite --config apps/web/vite.config.ts",
     "build": "npm run build:web",
     "vercel-build": "npm run build:web",
