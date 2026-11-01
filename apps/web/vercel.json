@@ -22,18 +22,8 @@
       ]
     }
   ],
-  "rewrites": [
-    {
-      "source": "/api/auth/callback/google",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/auth/callback",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
