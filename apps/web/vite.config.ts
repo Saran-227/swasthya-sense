@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, searchForWorkspaceRoot } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 
@@ -16,6 +16,14 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     host: '0.0.0.0',
+    fs: {
+      allow: [
+        searchForWorkspaceRoot(process.cwd()),
+        path.resolve(__dirname, '../../..'),
+        path.resolve(__dirname, '../..'),
+        path.resolve(__dirname, '..'),
+      ],
+    },
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:8000',
